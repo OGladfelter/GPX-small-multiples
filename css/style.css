@@ -1,16 +1,8 @@
-#container {
-  height: 50%;
-  width: 100%;
+#viz svg {
+  background: white;
+  margin: 2.5px;
 }
 
-.map {
-  height: 500px;
-  width: 500px;
-}
-
-/* Optional: Makes the sample page fill the window. */
-html, body {
-  height: 100%;
-  /* margin: 0;
-  padding: 0; */
+#viz svg:hover {
+  background: rgba(0, 255, 255, 0.5);
 }

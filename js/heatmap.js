@@ -24,6 +24,7 @@ var zoomExtent = 13, speed = 4, startingColor = 'red', endingColor = '#0e005e';
 function animateHeatmap(data, fastForward = 'N') {
 
     data = data.filter(d => d.type == "Run");
+    data = data.filter(d => d.map['summary_polyline'] != "");
 
     // turn off all dragging and zooming while the animation plays. Turn back on later.
     map.dragging.disable();

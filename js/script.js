@@ -75,12 +75,13 @@ function drawLinePlot(data, name, date, lineColor) {
     );
 }
 
-// Create the export function - this will just export 
-// the first svg element it finds
 function svgToCanvas() {
   var svgs = document.querySelectorAll('svg');
-  svgs.forEach(function(svg, i) {
-    var svgString = new XMLSerializer().serializeToString(svg);
+  [...svgs].map((svg, i) => { drawOnCavas(svg, i) });
+};
+
+function drawOnCavas(svg, i) {
+  var svgString = new XMLSerializer().serializeToString(svg);
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
     ctx.canvas.width  = window.innerWidth;
@@ -90,19 +91,22 @@ function svgToCanvas() {
     var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
     var url = DOMURL.createObjectURL(svg);
     img.onload = function() {
-        ctx.drawImage(img, (i % 25) * 55, Math.floor(i / 25) * 55);
+        // this will create rows with 25 activities. Move to a subsequent row when current row hits 25 activities.
         var png = canvas.toDataURL("image/png");
+        ctx.drawImage(img, (i % 25) * 55, Math.floor(i / 25) * 55);
         document.querySelector('#viz').innerHTML = '<img src="'+png+'"/>';
         DOMURL.revokeObjectURL(png);    
     };
     img.src = url;
+};
+
+function download() {
+  canvas.toBlob(function (blob) {
+      let link = document.createElement('a');
+      link.download = "test.png";
+      link.href = URL.createObjectURL(blob);
+      link.click();
   });
-  // canvas.toBlob(function (blob) {
-  //     let link = document.createElement('a');
-  //     link.download = "test.png";
-  //     link.href = URL.createObjectURL(blob);
-  //     link.click();
-  // });
 };
 
 initMap("data/data.json");
@@ -110,5 +114,6 @@ initMap("data/data.json");
 document.addEventListener("keyup", function(event) {
   if (event.keyCode === 13) { // 'enter' was pressed
     svgToCanvas();
+    document.getElementById("downloader").style.display = 'block';
   }
 });

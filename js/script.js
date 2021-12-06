@@ -34,7 +34,7 @@ function initMap(src) {
 function drawLinePlot(data, name, date, lineColor) {
 
   // set the dimensions and margins of the graph
-  var size = 40;
+  var size = 60;
   var m = 5;
   const margin = {top: m, right: m, bottom: m, left: m},
   width = size,
@@ -54,7 +54,7 @@ function drawLinePlot(data, name, date, lineColor) {
 
   // because we're plotting 3D data (lat, long position on earth) to 2D space, we need a projection
   var projection = d3.geoMercator()
-  .translate([width/2,height/2])
+  .translate([width / 2,height / 2])
   .fitSize([width,height], featureCollection);
 
   // append the svg object to the body of the page
@@ -73,7 +73,7 @@ function drawLinePlot(data, name, date, lineColor) {
     .datum(data)
     .attr("fill", "none")
     .attr("stroke", lineColor)
-    .attr("stroke-width", 1.5)
+    .attr("stroke-width", 2)
     .attr("d", d3.line()
         .x(function(d) { return projection([d.lng,d.lat])[0]; })
         .y(function(d) { return projection([d.lng,d.lat])[1] })
@@ -83,21 +83,21 @@ function drawLinePlot(data, name, date, lineColor) {
 // each activity takes up a space of about 55px (based on plot size of 40px plus 10px margin plus 5px padding)
 // so the # of activities drawn in each row before moving to the next row should be dynamically set based on how many 
 // activities the screen size can comfortably fit (screen width in px / 55px)
-function svgToCanvas(activityCount, activitiesPerRow = Math.floor(window.innerWidth / 55)) {
+function svgToCanvas(activityCount, activitiesPerRow = Math.floor(window.innerWidth / 75)) {
   var svgs = document.querySelectorAll('svg');
   svgs.forEach((svg, i) => {
     var svgString = new XMLSerializer().serializeToString(svg);
       var canvas = document.getElementById("canvas");
       var ctx = canvas.getContext("2d");
       ctx.canvas.width  = window.innerWidth;
-      ctx.canvas.height = activityCount / activitiesPerRow * 55; // should be # of total activities / # of activities per row * img size
+      ctx.canvas.height = activityCount / activitiesPerRow * 75; // should be # of total activities / # of activities per row * img size
       var DOMURL = self.URL || self.webkitURL || self;
       var img = new Image();
       var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
       var url = DOMURL.createObjectURL(svg);
       img.onload = function() {
           var png = canvas.toDataURL("image/png");
-          ctx.drawImage(img, (i % activitiesPerRow) * 55, Math.floor(i / activitiesPerRow) * 55); // move to a subsequent row when current row hits X activities.
+          ctx.drawImage(img, (i % activitiesPerRow) * 75, Math.floor(i / activitiesPerRow) * 75); // move to a subsequent row when current row hits X activities.
           document.querySelector('#viz').innerHTML = '<img src="'+png+'"/>';
           DOMURL.revokeObjectURL(png);    
       };

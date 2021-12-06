@@ -4,8 +4,6 @@ function initMap(src) {
       //data = data.filter(function(d) { return d.type == "Run" });
 
       data.forEach(d => {
-        //var path = google.maps.geometry.encoding.decodePath(d.map.summary_polyline);
-
         // returns an array of lat, lon pairs
         var path = polyline.decode(d.map.summary_polyline);
 
@@ -23,7 +21,14 @@ function initMap(src) {
 
         drawLinePlot(activityCoordinates, d.name, d.start_date, lineColor);
       });
-    });
+
+      document.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) { // 'enter' was pressed
+          svgToCanvas(data.length);
+          document.getElementById("downloader").style.display = 'block';
+        }
+      });
+  });
 }
 
 function drawLinePlot(data, name, date, lineColor) {
@@ -75,32 +80,29 @@ function drawLinePlot(data, name, date, lineColor) {
     );
 }
 
-function svgToCanvas() {
-  var svgs = document.querySelectorAll('svg');
-  [...svgs].map((svg, i) => { drawOnCavas(svg, i) });
-};
-
-// each activity takes up a space of about 55px (based on plot size of 40px plus margin/padding)
+// each activity takes up a space of about 55px (based on plot size of 40px plus 10px margin plus 5px padding)
 // so the # of activities drawn in each row before moving to the next row should be dynamically set based on how many 
 // activities the screen size can comfortably fit (screen width in px / 55px)
-function drawOnCavas(svg, i, activitiesPerRow = Math.floor(window.innerWidth / 55)) {
-  console.log(activitiesPerRow);
-  var svgString = new XMLSerializer().serializeToString(svg);
-    var canvas = document.getElementById("canvas");
-    var ctx = canvas.getContext("2d");
-    ctx.canvas.width  = window.innerWidth;
-    ctx.canvas.height = window.innerHeight * 2;
-    var DOMURL = self.URL || self.webkitURL || self;
-    var img = new Image();
-    var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
-    var url = DOMURL.createObjectURL(svg);
-    img.onload = function() {
-        var png = canvas.toDataURL("image/png");
-        ctx.drawImage(img, (i % activitiesPerRow) * 55, Math.floor(i / activitiesPerRow) * 55); // move to a subsequent row when current row hits X activities.
-        document.querySelector('#viz').innerHTML = '<img src="'+png+'"/>';
-        DOMURL.revokeObjectURL(png);    
-    };
-    img.src = url;
+function svgToCanvas(activityCount, activitiesPerRow = Math.floor(window.innerWidth / 55)) {
+  var svgs = document.querySelectorAll('svg');
+  svgs.forEach((svg, i) => {
+    var svgString = new XMLSerializer().serializeToString(svg);
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+      ctx.canvas.width  = window.innerWidth;
+      ctx.canvas.height = activityCount / activitiesPerRow * 55; // should be # of total activities / # of activities per row * img size
+      var DOMURL = self.URL || self.webkitURL || self;
+      var img = new Image();
+      var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+      var url = DOMURL.createObjectURL(svg);
+      img.onload = function() {
+          var png = canvas.toDataURL("image/png");
+          ctx.drawImage(img, (i % activitiesPerRow) * 55, Math.floor(i / activitiesPerRow) * 55); // move to a subsequent row when current row hits X activities.
+          document.querySelector('#viz').innerHTML = '<img src="'+png+'"/>';
+          DOMURL.revokeObjectURL(png);    
+      };
+      img.src = url;
+  });
 };
 
 function download() {
@@ -113,10 +115,3 @@ function download() {
 };
 
 initMap("data/data.json");
-
-document.addEventListener("keyup", function(event) {
-  if (event.keyCode === 13) { // 'enter' was pressed
-    svgToCanvas();
-    document.getElementById("downloader").style.display = 'block';
-  }
-});

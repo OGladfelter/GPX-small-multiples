@@ -17,9 +17,9 @@ function initMap(src) {
 
         var lineColor = 'black';
         // activities starting in Chicago should be in different color
-        if (d.start_longitude > -87.815606 && d.start_longitude < -87.564981 && d.start_latitude > 41.783071 && 42.010512) {
-            lineColor = 'blue';
-        }
+        // if (d.start_longitude > -87.815606 && d.start_longitude < -87.564981 && d.start_latitude > 41.783071 && 42.010512) {
+        //     lineColor = 'blue';
+        // }
 
         drawLinePlot(activityCoordinates, d.name, d.start_date, lineColor);
       });
@@ -75,4 +75,40 @@ function drawLinePlot(data, name, date, lineColor) {
     );
 }
 
+// Create the export function - this will just export 
+// the first svg element it finds
+function svgToCanvas() {
+  var svgs = document.querySelectorAll('svg');
+  svgs.forEach(function(svg, i) {
+    var svgString = new XMLSerializer().serializeToString(svg);
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.height = window.innerHeight * 2;
+    var DOMURL = self.URL || self.webkitURL || self;
+    var img = new Image();
+    var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+    var url = DOMURL.createObjectURL(svg);
+    img.onload = function() {
+        ctx.drawImage(img, (i % 25) * 55, Math.floor(i / 25) * 55);
+        var png = canvas.toDataURL("image/png");
+        document.querySelector('#viz').innerHTML = '<img src="'+png+'"/>';
+        DOMURL.revokeObjectURL(png);    
+    };
+    img.src = url;
+  });
+  // canvas.toBlob(function (blob) {
+  //     let link = document.createElement('a');
+  //     link.download = "test.png";
+  //     link.href = URL.createObjectURL(blob);
+  //     link.click();
+  // });
+};
+
 initMap("data/data.json");
+
+document.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) { // 'enter' was pressed
+    svgToCanvas();
+  }
+});

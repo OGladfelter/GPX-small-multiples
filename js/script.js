@@ -80,7 +80,11 @@ function svgToCanvas() {
   [...svgs].map((svg, i) => { drawOnCavas(svg, i) });
 };
 
-function drawOnCavas(svg, i) {
+// each activity takes up a space of about 55px (based on plot size of 40px plus margin/padding)
+// so the # of activities drawn in each row before moving to the next row should be dynamically set based on how many 
+// activities the screen size can comfortably fit (screen width in px / 55px)
+function drawOnCavas(svg, i, activitiesPerRow = Math.floor(window.innerWidth / 55)) {
+  console.log(activitiesPerRow);
   var svgString = new XMLSerializer().serializeToString(svg);
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
@@ -91,9 +95,8 @@ function drawOnCavas(svg, i) {
     var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
     var url = DOMURL.createObjectURL(svg);
     img.onload = function() {
-        // this will create rows with 25 activities. Move to a subsequent row when current row hits 25 activities.
         var png = canvas.toDataURL("image/png");
-        ctx.drawImage(img, (i % 25) * 55, Math.floor(i / 25) * 55);
+        ctx.drawImage(img, (i % activitiesPerRow) * 55, Math.floor(i / activitiesPerRow) * 55); // move to a subsequent row when current row hits X activities.
         document.querySelector('#viz').innerHTML = '<img src="'+png+'"/>';
         DOMURL.revokeObjectURL(png);    
     };
@@ -103,7 +106,7 @@ function drawOnCavas(svg, i) {
 function download() {
   canvas.toBlob(function (blob) {
       let link = document.createElement('a');
-      link.download = "test.png";
+      link.download = "GPX_activities_on_small_multiples.png";
       link.href = URL.createObjectURL(blob);
       link.click();
   });

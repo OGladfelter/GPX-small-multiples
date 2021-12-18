@@ -73,31 +73,32 @@ function drawLinePlot(data, name, date, lineColor) {
     .datum(data)
     .attr("fill", "none")
     .attr("stroke", lineColor)
-    .attr("stroke-width", 2)
+    .attr("stroke-width", 1)
     .attr("d", d3.line()
         .x(function(d) { return projection([d.lng,d.lat])[0]; })
         .y(function(d) { return projection([d.lng,d.lat])[1] })
     );
 }
 
-// each activity takes up a space of about 55px (based on plot size of 40px plus 10px margin plus 5px padding)
+// each activity takes up a space of about 55px (based on plot size of 60px plus 10px margin plus 20px padding)
 // so the # of activities drawn in each row before moving to the next row should be dynamically set based on how many 
 // activities the screen size can comfortably fit (screen width in px / 55px)
-function svgToCanvas(activityCount, activitiesPerRow = Math.floor(window.innerWidth / 75)) {
+function svgToCanvas(activityCount, activitiesPerRow = Math.floor(window.innerWidth / (60 + 10 + 20))) {
+  activitySize = 60 + 10 + 20;
   var svgs = document.querySelectorAll('svg');
   svgs.forEach((svg, i) => {
     var svgString = new XMLSerializer().serializeToString(svg);
       var canvas = document.getElementById("canvas");
       var ctx = canvas.getContext("2d");
       ctx.canvas.width  = window.innerWidth;
-      ctx.canvas.height = activityCount / activitiesPerRow * 75; // should be # of total activities / # of activities per row * img size
+      ctx.canvas.height = activityCount / activitiesPerRow * activitySize; // should be # of total activities / # of activities per row * img size
       var DOMURL = self.URL || self.webkitURL || self;
       var img = new Image();
       var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
       var url = DOMURL.createObjectURL(svg);
       img.onload = function() {
           var png = canvas.toDataURL("image/png");
-          ctx.drawImage(img, (i % activitiesPerRow) * 75, Math.floor(i / activitiesPerRow) * 75); // move to a subsequent row when current row hits X activities.
+          ctx.drawImage(img, (i % activitiesPerRow) * activitySize, Math.floor(i / activitiesPerRow) * activitySize); // move to a subsequent row when current row hits X activities.
           document.querySelector('#viz').innerHTML = '<img src="'+png+'"/>';
           DOMURL.revokeObjectURL(png);    
       };
